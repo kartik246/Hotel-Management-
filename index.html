@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuxeStay HMS — Hotel Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #F5E6B8;
+  --gold-dark: #9A7A2E;
+  --navy: #0F1B2D;
+  --navy-mid: #1A2E47;
+  --navy-light: #243B55;
+  --cream: #FAF7F2;
+  --cream-dark: #F0EAE0;
+  --slate: #64748B;
+  --text: #1A1A2E;
+  --text-muted: #6B7280;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+  --border: rgba(201,168,76,0.15);
+  --shadow: 0 4px 24px rgba(15,27,45,0.08);
+  --shadow-lg: 0 12px 40px rgba(15,27,45,0.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+/* LAYOUT */
+.hms-shell { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 240px; background: var(--navy); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+.main-area { flex: 1; overflow-y: auto; background: var(--cream); }
+
+/* SIDEBAR */
+.sidebar-brand { padding: 28px 20px 20px; border-bottom: 1px solid rgba(201,168,76,0.2); }
+.brand-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--gold); letter-spacing: 0.5px; }
+.brand-sub { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+.nav-section { padding: 16px 12px 8px; }
+.nav-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px 8px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 13.5px; font-weight: 400; transition: all 0.18s; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(201,168,76,0.1); color: rgba(255,255,255,0.9); }
+.nav-item.active { background: rgba(201,168,76,0.18); color: var(--gold); font-weight: 500; }
+.nav-icon { width: 18px; height: 18px; opacity: 0.75; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+
+.sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+.user-pill { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--navy); flex-shrink: 0; }
+.user-name { font-size: 12.5px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.user-role { font-size: 10.5px; color: rgba(255,255,255,0.35); }
+
+/* TOPBAR */
+.topbar { background: white; border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar-title { font-size: 18px; font-weight: 500; color: var(--text); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.18s; font-family: 'DM Sans', sans-serif; }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-dark); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+.badge-success { background: #D1FAE5; color: #065F46; }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+.badge-danger { background: #FEE2E2; color: #991B1B; }
+.badge-info { background: #DBEAFE; color: #1E40AF; }
+.badge-gray { background: #F3F4F6; color: #374151; }
+
+/* PAGE CONTENT */
+.page { display: none; padding: 28px; }
+.page.active { display: block; }
+
+/* STAT CARDS */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 14px; padding: 20px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 14px 14px 0 0; }
+.stat-card.gold::before { background: var(--gold); }
+.stat-card.green::before { background: var(--success); }
+.stat-card.blue::before { background: var(--info); }
+.stat-card.red::before { background: var(--danger); }
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 8px; }
+.stat-value { font-size: 32px; font-weight: 300; color: var(--text); line-height: 1; margin-bottom: 6px; font-family: 'DM Serif Display', serif; }
+.stat-delta { font-size: 12px; color: var(--success); }
+.stat-delta.down { color: var(--danger); }
+.stat-icon { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; border-radius: 10px; background: var(--cream-dark); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+/* CARDS */
+.card { background: white; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.card-body { padding: 20px; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { padding: 10px 16px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 500; background: var(--cream); border-bottom: 1px solid var(--border); }
+td { padding: 13px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--cream); }
+
+/* GRID LAYOUTS */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* ROOM GRID */
+.room-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.room-cell { aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: transform 0.15s; border: 2px solid transparent; }
+.room-cell:hover { transform: scale(1.06); }
+.room-cell.available { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.room-cell.occupied { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.room-cell.cleaning { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.room-cell.maintenance { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.room-num { font-size: 15px; font-weight: 700; }
+.room-type-label { font-size: 9px; font-weight: 400; opacity: 0.7; margin-top: 2px; }
+
+/* OCCUPANCY BAR */
+.occ-bar-track { height: 12px; background: var(--cream-dark); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+.occ-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), #E8B84B); transition: width 0.6s ease; }
+
+/* TIMELINE */
+.timeline-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.timeline-item:last-child { border-bottom: none; }
+.timeline-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.timeline-time { font-size: 11px; color: var(--text-muted); min-width: 48px; }
+.timeline-text { font-size: 13px; color: var(--text); }
+.timeline-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+/* FORM */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+input, select, textarea { padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13.5px; font-family: 'DM Sans', sans-serif; color: var(--text); background: white; outline: none; transition: border-color 0.18s; }
+input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+textarea { resize: vertical; min-height: 80px; }
+
+/* TABS */
+.tab-bar { display: flex; gap: 4px; padding: 4px; background: var(--cream-dark); border-radius: 10px; margin-bottom: 20px; }
+.tab { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: all 0.18s; }
+.tab.active { background: white; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+/* HOUSEKEEPING STATUS */
+.hk-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.hk-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; margin-top: 3px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+
+/* INVOICE */
+.invoice-table td:last-child { text-align: right; }
+.invoice-total { background: var(--cream); font-weight: 600; }
+
+/* CHART */
+.chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-top: 8px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar { width: 100%; border-radius: 5px 5px 0 0; background: var(--gold-light); border: 1px solid rgba(201,168,76,0.3); transition: all 0.3s; cursor: pointer; }
+.chart-bar:hover { background: var(--gold); }
+.chart-bar-label { font-size: 10px; color: var(--text-muted); }
+
+/* NOTIFICATION */
+.notif { padding: 12px 16px; border-radius: 10px; border-left: 3px solid; margin-bottom: 10px; font-size: 13px; }
+.notif-success { background: #F0FDF4; border-color: var(--success); color: #065F46; }
+.notif-warning { background: #FFFBEB; border-color: var(--warning); color: #92400E; }
+.notif-info { background: #EFF6FF; border-color: var(--info); color: #1E40AF; }
+
+/* PROGRESS */
+.progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.progress-label { font-size: 12.5px; color: var(--text-muted); min-width: 80px; }
+.progress-track { flex: 1; height: 8px; background: var(--cream-dark); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; }
+.progress-val { font-size: 12px; font-weight: 600; min-width: 36px; text-align: right; }
+
+/* MODAL OVERLAY */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,27,45,0.5); z-index: 100; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px; width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 600; }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--cream); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 99px; }
+
+/* PULSE */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; display: inline-block; margin-right: 6px; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
+.toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="hms-shell">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name">LuxeStay</div>
+      <div class="brand-sub">HMS • Property 01</div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="showPage('rooms', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="1.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path stroke-width="1.5" d="M9 22V12h6v10"/></svg>
+        Rooms
+      </div>
+      <div class="nav-item" onclick="showPage('bookings', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><line x1="16" y1="2" x2="16" y2="6" stroke-width="1.5"/><line x1="8" y1="2" x2="8" y2="6" stroke-width="1.5"/><line x1="3" y1="10" x2="21" y2="10" stroke-width="1.5"/></svg>
+        Bookings
+      </div>
+      <div class="nav-item" onclick="showPage('checkin', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="1.5" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        Check-in / Out
+      </div>
+      <div class="nav-item" onclick="showPage('billing', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="1.5"/><line x1="2" y1="10" x2="22" y2="10" stroke-width="1.5"/></svg>
+        Billing
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+      <div class="nav-item" onclick="showPage('housekeeping', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="1.5" d="M3 19l3-12h12l3 12H3z"/><path stroke-width="1.5" d="M8 19v2M16 19v2M12 7v4"/></svg>
+        Housekeeping
+      </div>
+      <div class="nav-item" onclick="showPage('reports', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10" stroke-width="1.5"/><line x1="12" y1="20" x2="12" y2="4" stroke-width="1.5"/><line x1="6" y1="20" x2="6" y2="14" stroke-width="1.5"/></svg>
+        Analytics
+      </div>
+      <div class="nav-item" onclick="showPage('guests', this)">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="1.5" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4" stroke-width="1.5"/><path stroke-width="1.5" d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Guests
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">System</div>
+      <div class="nav-item">
+        <svg class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3" stroke-width="1.5"/><path stroke-width="1.5" d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">AD</div>
+        <div>
+          <div class="user-name">Alex Dubois</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <div style="font-size: 10px; color: var(--gold-light); opacity: 0.7; margin-top: 10px; text-align: center; font-family: 'DM Sans', sans-serif;">
+        made by Kartik Chhabra
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="live-dot"></span>
+        <span class="topbar-title" id="page-title">Dashboard</span>
+      </div>
+      <div class="topbar-actions">
+        <span style="font-size:13px;color:var(--text-muted)">Sun, 22 Mar 2026</span>
+        <button class="btn btn-gold" onclick="openModal('new-booking')">+ New Booking</button>
+      </div>
+    </div>
+
+    <!-- ===================== DASHBOARD PAGE ===================== -->
+    <div id="page-dashboard" class="page active">
+      <div class="stat-grid">
+        <div class="stat-card gold">
+          <div class="stat-label">Occupancy Rate</div>
+          <div class="stat-value">78%</div>
+          <div class="stat-delta">↑ 4.2% vs yesterday</div>
+          <div class="stat-icon">🏨</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-value">₹2.4L</div>
+          <div class="stat-delta">↑ 12% vs last week</div>
+          <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Active Guests</div>
+          <div class="stat-value">47</div>
+          <div class="stat-delta">↑ 3 check-ins today</div>
+          <div class="stat-icon">👥</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-label">Pending Requests</div>
+          <div class="stat-value">6</div>
+          <div class="stat-delta down">↑ 2 maintenance alerts</div>
+          <div class="stat-icon">⚠️</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- ARRIVALS TODAY -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Today's Arrivals</div>
+            <span class="badge badge-info">8 expected</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <table>
+              <thead><tr><th>Guest</th><th>Room</th><th>Type</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><div style="font-weight:500">Priya Sharma</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-001</div></td><td>401</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-success">Checked In</span></td></tr>
+                <tr><td><div style="font-weight:500">James O'Brien</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-002</div></td><td>215</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
+                <tr><td><div style="font-weight:500">Aiko Tanaka</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-003</div></td><td>118</td><td><span class="badge badge-gray">Standard</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
+                <tr><td><div style="font-weight:500">Ravi Menon</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-004</div></td><td>302</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
+                <tr><td><div style="font-weight:500">Sofia Bianchi</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-005</div></td><td>501</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- LIVE ACTIVITY -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Live Activity Log</div>
+            <span style="font-size:12px;color:var(--text-muted)">Auto-updates</span>
+          </div>
+          <div class="card-body">
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--success)"></div>
+              <div class="timeline-time">09:42</div>
+              <div><div class="timeline-text">Priya Sharma checked in</div><div class="timeline-sub">Suite 401 · Key card issued</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--gold)"></div>
+              <div class="timeline-time">09:31</div>
+              <div><div class="timeline-text">Room 310 marked clean</div><div class="timeline-sub">HK Staff: Meena Patel</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--info)"></div>
+              <div class="timeline-time">09:15</div>
+              <div><div class="timeline-text">Invoice generated</div><div class="timeline-sub">INV-2026-0842 · ₹18,400</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--danger)"></div>
+              <div class="timeline-time">08:55</div>
+              <div><div class="timeline-text">Maintenance request — Room 214</div><div class="timeline-sub">AC not cooling · Priority: High</div></div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--success)"></div>
+              <div class="timeline-time">08:30</div>
+              <div><div class="timeline-text">Ahmed Hassan checked out</div><div class="timeline-sub">Room 202 · Final bill settled</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OCCUPANCY + WEEKLY REVENUE -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Room Type Occupancy</div>
+          </div>
+          <div class="card-body">
+            <div class="progress-row">
+              <div class="progress-label">Suite</div>
+              <div class="progress-track"><div class="progress-fill" style="width:90%;background:var(--gold)"></div></div>
+              <div class="progress-val" style="color:var(--gold)">90%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Deluxe</div>
+              <div class="progress-track"><div class="progress-fill" style="width:75%;background:var(--info)"></div></div>
+              <div class="progress-val" style="color:var(--info)">75%</div>
+            </div>
+            <div class="progress-row">
+              <div class="progress-label">Standard</div>
+              <div class="progress-track"><div class="progress-fill" style="width:62%;background:var(--success)"></div></div>
+              <div class="progress-val" style="color:var(--success)">62%</div>
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span style="font-size:13px;color:var(--text-muted)">Overall Occupancy</span>
+                <span style="font-size:13px;font-weight:600">78%</span>
+              </div>
+              <div class="occ-bar-track"><div class="occ-bar-fill" style="width:78%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Weekly Revenue</div>
+            <span style="font-size:12px;color:var(--text-muted)">Mar 16–22, 2026</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-bars">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:55%"></div><div class="chart-bar-label">Mon</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%"></div><div class="chart-bar-label">Tue</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:48%"></div><div class="chart-bar-label">Wed</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:82%"></div><div class="chart-bar-label">Thu</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:90%"></div><div class="chart-bar-label">Fri</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:100%;background:var(--gold)"></div><div class="chart-bar-label">Sat</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:76%"></div><div class="chart-bar-label">Sun</div></div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:20px">
+              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">This Week</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹14.7L</div></div>
+              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">RevPAR</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹4,820</div></div>
+              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">ADR</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹6,180</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Alerts & Notifications</div></div>
+        <div class="card-body">
+          <div class="notif notif-warning">⚠️ Room 214 — AC maintenance request pending since 08:55. Technician not yet assigned.</div>
+          <div class="notif notif-info">📧 5 guests have not yet received their pre-arrival welcome email for tomorrow's bookings.</div>
+          <div class="notif notif-success">✅ All 3 checkouts due today (8:00–11:00) have been processed successfully.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ROOMS PAGE ===================== -->
+    <div id="page-rooms" class="page">
+      <div class="tab-bar">
+        <div class="tab active" onclick="switchTab(this,'room-map')">Room Map</div>
+        <div class="tab" onclick="switchTab(this,'room-list')">Room List</div>
+        <div class="tab" onclick="switchTab(this,'pricing')">Pricing</div>
+      </div>
+
+      <div id="room-map">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Live Room Status — All Floors</div>
+            <div class="hk-legend">
+              <div class="legend-item"><div class="hk-dot" style="background:#D1FAE5;border:1.5px solid #A7F3D0"></div>Available</div>
+              <div class="legend-item"><div class="hk-dot" style="background:#DBEAFE;border:1.5px solid #BFDBFE"></div>Occupied</div>
+              <div class="legend-item"><div class="hk-dot" style="background:#FEF3C7;border:1.5px solid #FDE68A"></div>Cleaning</div>
+              <div class="legend-item"><div class="hk-dot" style="background:#FEE2E2;border:1.5px solid #FECACA"></div>Maintenance</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Floor 1</div>
+            <div class="room-grid" style="margin-bottom:20px">
+              <div class="room-cell available" onclick="showRoomDetail(101)"><div class="room-num">101</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(102)"><div class="room-num">102</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(103)"><div class="room-num">103</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell cleaning" onclick="showRoomDetail(104)"><div class="room-num">104</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(105)"><div class="room-num">105</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(106)"><div class="room-num">106</div><div class="room-type-label">Deluxe</div></div>
+            </div>
+            <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Floor 2</div>
+            <div class="room-grid" style="margin-bottom:20px">
+              <div class="room-cell occupied" onclick="showRoomDetail(201)"><div class="room-num">201</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell maintenance" onclick="showRoomDetail(214)"><div class="room-num">214</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(203)"><div class="room-num">203</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(204)"><div class="room-num">204</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(205)"><div class="room-num">205</div><div class="room-type-label">Standard</div></div>
+              <div class="room-cell cleaning" onclick="showRoomDetail(206)"><div class="room-num">206</div><div class="room-type-label">Standard</div></div>
+            </div>
+            <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Floor 3–5 (Suites & Premium Deluxe)</div>
+            <div class="room-grid">
+              <div class="room-cell occupied" onclick="showRoomDetail(301)"><div class="room-num">301</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(302)"><div class="room-num">302</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(310)"><div class="room-num">310</div><div class="room-type-label">Deluxe</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(401)"><div class="room-num">401</div><div class="room-type-label">Suite</div></div>
+              <div class="room-cell available" onclick="showRoomDetail(402)"><div class="room-num">402</div><div class="room-type-label">Suite</div></div>
+              <div class="room-cell occupied" onclick="showRoomDetail(501)"><div class="room-num">501</div><div class="room-type-label">Suite</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="room-list" style="display:none">
+        <div class="card">
+          <div class="card-header"><div class="card-title">All Rooms</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Room</th><th>Type</th><th>Floor</th><th>Base Rate</th><th>Status</th><th>Current Guest</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>101</td><td>Standard</td><td>1</td><td>₹4,500/night</td><td><span class="badge badge-success">Available</span></td><td>—</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px" onclick="openModal('new-booking')">Book</button></td></tr>
+                <tr><td>102</td><td>Standard</td><td>1</td><td>₹4,500/night</td><td><span class="badge badge-info">Occupied</span></td><td>James O'Brien</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">View</button></td></tr>
+                <tr><td>201</td><td>Standard</td><td>2</td><td>₹4,500/night</td><td><span class="badge badge-info">Occupied</span></td><td>Ravi Menon</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">View</button></td></tr>
+                <tr><td>214</td><td>Deluxe</td><td>2</td><td>₹7,200/night</td><td><span class="badge badge-danger">Maintenance</span></td><td>—</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">Log</button></td></tr>
+                <tr><td>302</td><td>Deluxe</td><td>3</td><td>₹7,200/night</td><td><span class="badge badge-info">Occupied</span></td><td>Aiko Tanaka</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">View</button></td></tr>
+                <tr><td>401</td><td>Suite</td><td>4</td><td>₹14,000/night</td><td><span class="badge badge-info">Occupied</span></td><td>Priya Sharma</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">View</button></td></tr>
+                <tr><td>402</td><td>Suite</td><td>4</td><td>₹14,000/night</td><td><span class="badge badge-success">Available</span></td><td>—</td><td><button class="btn btn-gold" style="padding:5px 12px;font-size:12px" onclick="openModal('new-booking')">Book</button></td></tr>
+                <tr><td>501</td><td>Suite</td><td>5</td><td>₹14,000/night</td><td><span class="badge badge-info">Occupied</span></td><td>Sofia Bianchi</td><td><button class="btn btn-outline" style="padding:5px 12px;font-size:12px">View</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="pricing" style="display:none">
+        <div class="three-col">
+          <div class="card" style="border-top:3px solid var(--text-muted)">
+            <div class="card-header"><div class="card-title">Standard Room</div></div>
+            <div class="card-body">
+              <div style="font-size:28px;font-family:'DM Serif Display',serif;margin-bottom:4px">₹4,500 <span style="font-size:14px;font-weight:400;color:var(--text-muted)">/night</span></div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">18 GST + ₹200 tourism levy</div>
+              <div style="font-size:13px;line-height:2;color:var(--text-muted)">✓ City view · ✓ King/Twin bed · ✓ 25 sqm · ✓ Free WiFi · ✓ Breakfast included · ✓ Mini-bar</div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)">Capacity: 20 rooms</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--gold)">
+            <div class="card-header"><div class="card-title">Deluxe Room</div><span class="badge badge-warning">Popular</span></div>
+            <div class="card-body">
+              <div style="font-size:28px;font-family:'DM Serif Display',serif;margin-bottom:4px">₹7,200 <span style="font-size:14px;font-weight:400;color:var(--text-muted)">/night</span></div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">18% GST + ₹200 tourism levy</div>
+              <div style="font-size:13px;line-height:2;color:var(--text-muted)">✓ Pool/garden view · ✓ King bed · ✓ 38 sqm · ✓ Free WiFi · ✓ Breakfast + dinner · ✓ Bathtub · ✓ Butler on demand</div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)">Capacity: 15 rooms</div>
+            </div>
+          </div>
+          <div class="card" style="border-top:3px solid var(--navy)">
+            <div class="card-header"><div class="card-title">Suite</div><span class="badge badge-gray">Luxury</span></div>
+            <div class="card-body">
+              <div style="font-size:28px;font-family:'DM Serif Display',serif;margin-bottom:4px">₹14,000 <span style="font-size:14px;font-weight:400;color:var(--text-muted)">/night</span></div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">18% GST + ₹200 tourism levy</div>
+              <div style="font-size:13px;line-height:2;color:var(--text-muted)">✓ Panoramic view · ✓ King bed + lounge · ✓ 70 sqm · ✓ All meals · ✓ Jacuzzi · ✓ Dedicated butler · ✓ Airport transfer</div>
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-muted)">Capacity: 5 suites</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== BOOKINGS PAGE ===================== -->
+    <div id="page-bookings" class="page">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">All Reservations</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="text" placeholder="Search guest or booking ID..." style="width:220px;padding:7px 12px;font-size:13px">
+            <button class="btn btn-gold" onclick="openModal('new-booking')">+ New Booking</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Booking ID</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--gold)">BK-20260322-001</td>
+                <td><div style="font-weight:500">Priya Sharma</div><div style="font-size:11px;color:var(--text-muted)">priya@email.com</div></td>
+                <td>Suite 401</td><td>22 Mar 2026</td><td>26 Mar 2026</td><td>4</td><td>₹58,800</td><td><span class="badge badge-success">Checked In</span></td>
+                <td><button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="openModal('invoice')">Invoice</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--gold)">BK-20260322-002</td>
+                <td><div style="font-weight:500">James O'Brien</div><div style="font-size:11px;color:var(--text-muted)">james@email.com</div></td>
+                <td>Deluxe 215</td><td>22 Mar 2026</td><td>24 Mar 2026</td><td>2</td><td>₹15,840</td><td><span class="badge badge-warning">Arriving</span></td>
+                <td><button class="btn btn-outline" style="padding:5px 10px;font-size:12px">Check In</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--gold)">BK-20260320-015</td>
+                <td><div style="font-weight:500">Ahmed Hassan</div><div style="font-size:11px;color:var(--text-muted)">ahmed@email.com</div></td>
+                <td>Standard 202</td><td>20 Mar 2026</td><td>22 Mar 2026</td><td>2</td><td>₹9,720</td><td><span class="badge badge-gray">Checked Out</span></td>
+                <td><button class="btn btn-outline" style="padding:5px 10px;font-size:12px" onclick="openModal('invoice')">Receipt</button></td>
+              </tr>
+              <tr>
+                <td style="font-family:monospace;font-size:12px;color:var(--gold)">BK-20260325-001</td>
+                <td><div style="font-weight:500">Sofia Bianchi</div><div style="font-size:11px;color:var(--text-muted)">sofia@email.com</div></td>
+                <td>Suite 501</td><td>25 Mar 2026</td><td>29 Mar 2026</td><td>4</td><td>₹58,800</td><td><span class="badge badge-info">Confirmed</span></td>
+                <td><button class="btn btn-outline" style="padding:5px 10px;font-size:12px">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== CHECK-IN/OUT PAGE ===================== -->
+    <div id="page-checkin" class="page">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">🚪 Check-In</div></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Booking ID / Guest Name</label>
+                <input type="text" placeholder="Enter booking ID or guest name" id="ci-search">
+              </div>
+            </div>
+            <div style="padding:16px;background:var(--cream);border-radius:10px;border:1px solid var(--border);margin-bottom:16px">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Guest Details (auto-filled)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+                <div><span style="color:var(--text-muted)">Name:</span> James O'Brien</div>
+                <div><span style="color:var(--text-muted)">Room:</span> Deluxe 215</div>
+                <div><span style="color:var(--text-muted)">Check-in:</span> 22 Mar 2026</div>
+                <div><span style="color:var(--text-muted)">Check-out:</span> 24 Mar 2026</div>
+                <div><span style="color:var(--text-muted)">Guests:</span> 2 Adults</div>
+                <div><span style="color:var(--text-muted)">Advance:</span> ₹7,920 paid</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>ID Document</label>
+                <select><option>Aadhaar Card</option><option>Passport</option><option>Driver's Licence</option></select>
+              </div>
+              <div class="form-group">
+                <label>ID Number</label>
+                <input type="text" placeholder="XXXX-XXXX-XXXX">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Key Card No.</label>
+                <input type="text" placeholder="Auto-assign or enter manually" value="KC-0215-A">
+              </div>
+              <div class="form-group">
+                <label>Actual Arrival Time</label>
+                <input type="time" value="10:30">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:16px">
+              <label>Special Notes</label>
+              <textarea placeholder="Honeymoon setup, dietary restrictions, etc."></textarea>
+            </div>
+            <button class="btn btn-gold" style="width:100%;padding:11px" onclick="showToast('✅ James O\'Brien checked in — Key card KC-0215-A issued')">Confirm Check-In</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">🚶 Check-Out</div></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>Booking ID / Room Number</label>
+                <input type="text" placeholder="e.g. BK-20260320-015 or Room 202">
+              </div>
+            </div>
+            <div style="padding:16px;background:var(--cream);border-radius:10px;border:1px solid var(--border);margin-bottom:16px">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Checkout Summary — Ahmed Hassan · Room 202</div>
+              <table style="font-size:13px;width:100%">
+                <tr><td style="color:var(--text-muted);padding:3px 0">Room (2 nights × ₹4,500)</td><td style="text-align:right;padding:3px 0">₹9,000</td></tr>
+                <tr><td style="color:var(--text-muted);padding:3px 0">Laundry service</td><td style="text-align:right;padding:3px 0">₹350</td></tr>
+                <tr><td style="color:var(--text-muted);padding:3px 0">Room service (2x)</td><td style="text-align:right;padding:3px 0">₹820</td></tr>
+                <tr><td style="color:var(--text-muted);padding:3px 0">GST @18%</td><td style="text-align:right;padding:3px 0">₹1,827</td></tr>
+                <tr style="font-weight:600;border-top:1px solid var(--border)"><td style="padding:6px 0">Total</td><td style="text-align:right;padding:6px 0;color:var(--gold)">₹11,997</td></tr>
+                <tr><td style="color:var(--text-muted);padding:3px 0">Advance paid</td><td style="text-align:right;padding:3px 0">-₹9,720</td></tr>
+                <tr style="font-weight:700"><td style="padding:3px 0">Balance Due</td><td style="text-align:right;padding:3px 0;color:var(--danger)">₹2,277</td></tr>
+              </table>
+            </div>
+            <div class="form-group" style="margin-bottom:16px">
+              <label>Payment Method</label>
+              <select><option>UPI / QR</option><option>Credit Card</option><option>Debit Card</option><option>Cash</option><option>Bank Transfer</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;background:#FEF3C7;border-radius:8px;font-size:13px;color:#92400E">
+              <span>⚠️</span> Key card KC-0202-A must be returned before checkout.
+            </div>
+            <button class="btn btn-gold" style="width:100%;padding:11px" onclick="showToast('✅ Ahmed Hassan checked out. Invoice INV-2026-0843 emailed.')">Process Check-Out & Generate Invoice</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIGITAL LOG -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">Digital Check-in/out Log — Today</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Time</th><th>Type</th><th>Guest</th><th>Room</th><th>Staff</th><th>Key Card</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>09:42</td><td><span class="badge badge-success">Check-In</span></td><td>Priya Sharma</td><td>Suite 401</td><td>Receptionist: Anita K.</td><td>KC-0401-A</td><td><span class="badge badge-success">Complete</span></td></tr>
+              <tr><td>08:30</td><td><span class="badge badge-gray">Check-Out</span></td><td>Ahmed Hassan</td><td>Std 202</td><td>Receptionist: Anita K.</td><td>KC-0202-A ✓ Returned</td><td><span class="badge badge-success">Complete</span></td></tr>
+              <tr><td>08:15</td><td><span class="badge badge-gray">Check-Out</span></td><td>Lee Joon-ho</td><td>Dlx 305</td><td>Receptionist: Vikram S.</td><td>KC-0305-B ✓ Returned</td><td><span class="badge badge-success">Complete</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== BILLING PAGE ===================== -->
+    <div id="page-billing" class="page">
+      <div class="two-col">
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Generate Invoice</div>
+              <button class="btn btn-outline" style="font-size:12px;padding:6px 12px" onclick="openModal('invoice')">Preview</button>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group full">
+                  <label>Booking Reference</label>
+                  <select>
+                    <option>BK-20260322-001 — Priya Sharma (Suite 401)</option>
+                    <option>BK-20260322-002 — James O'Brien (Dlx 215)</option>
+                    <option>BK-20260320-015 — Ahmed Hassan (Std 202)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="padding:14px;background:var(--cream);border-radius:10px;margin-bottom:16px">
+                <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:10px">Line Items</div>
+                <table style="width:100%;font-size:13px">
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">Room — Suite 401 × 4 nights</td><td style="text-align:right;padding:5px 0">₹56,000</td></tr>
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">Room Service (3 orders)</td><td style="text-align:right;padding:5px 0">₹1,840</td></tr>
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">Laundry</td><td style="text-align:right;padding:5px 0">₹620</td></tr>
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">Spa Treatment</td><td style="text-align:right;padding:5px 0">₹3,200</td></tr>
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">Tourism Levy (₹200/night)</td><td style="text-align:right;padding:5px 0">₹800</td></tr>
+                  <tr><td style="padding:5px 0;color:var(--text-muted)">GST @18%</td><td style="text-align:right;padding:5px 0">₹11,116</td></tr>
+                  <tr style="font-weight:700;border-top:1px solid var(--border)"><td style="padding:8px 0">Total</td><td style="text-align:right;padding:8px 0;font-size:16px;color:var(--gold)">₹73,576</td></tr>
+                </table>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Add Service</label>
+                  <select><option>Room Service</option><option>Laundry</option><option>Spa</option><option>Mini Bar</option><option>Airport Transfer</option></select>
+                </div>
+                <div class="form-group">
+                  <label>Amount (₹)</label>
+                  <input type="number" placeholder="0.00">
+                </div>
+              </div>
+              <button class="btn btn-outline" style="width:100%;padding:9px;margin-bottom:10px">+ Add Line Item</button>
+              <button class="btn btn-gold" style="width:100%;padding:11px" onclick="showToast('📄 Invoice INV-2026-0844 generated & emailed to priya@email.com')">Generate & Send Invoice</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Invoices</div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Invoice</th><th>Guest</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td style="font-family:monospace;font-size:12px">INV-2026-0842</td><td>Priya Sharma</td><td>₹73,576</td><td><span class="badge badge-warning">Pending</span></td></tr>
+                  <tr><td style="font-family:monospace;font-size:12px">INV-2026-0841</td><td>Ahmed Hassan</td><td>₹11,997</td><td><span class="badge badge-success">Paid</span></td></tr>
+                  <tr><td style="font-family:monospace;font-size:12px">INV-2026-0840</td><td>Lee Joon-ho</td><td>₹24,340</td><td><span class="badge badge-success">Paid</span></td></tr>
+                  <tr><td style="font-family:monospace;font-size:12px">INV-2026-0839</td><td>Maria Garcia</td><td>₹9,200</td><td><span class="badge badge-success">Paid</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Revenue Breakdown — March</div></div>
+            <div class="card-body">
+              <div class="progress-row"><div class="progress-label">Room Charges</div><div class="progress-track"><div class="progress-fill" style="width:72%;background:var(--gold)"></div></div><div class="progress-val">72%</div></div>
+              <div class="progress-row"><div class="progress-label">F&B</div><div class="progress-track"><div class="progress-fill" style="width:14%;background:var(--info)"></div></div><div class="progress-val">14%</div></div>
+              <div class="progress-row"><div class="progress-label">Spa & Leisure</div><div class="progress-track"><div class="progress-fill" style="width:9%;background:var(--success)"></div></div><div class="progress-val">9%</div></div>
+              <div class="progress-row"><div class="progress-label">Other</div><div class="progress-track"><div class="progress-fill" style="width:5%;background:var(--text-muted)"></div></div><div class="progress-val">5%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== HOUSEKEEPING PAGE ===================== -->
+    <div id="page-housekeeping" class="page">
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card green"><div class="stat-label">Clean</div><div class="stat-value">28</div><div class="stat-icon">✅</div></div>
+        <div class="stat-card gold"><div class="stat-label">In Progress</div><div class="stat-value">5</div><div class="stat-icon">🧹</div></div>
+        <div class="stat-card red"><div class="stat-label">Maintenance</div><div class="stat-value">2</div><div class="stat-icon">🔧</div></div>
+        <div class="stat-card blue"><div class="stat-label">Occupied</div><div class="stat-value">25</div><div class="stat-icon">🛏️</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Housekeeping Tasks</div><button class="btn btn-gold" style="font-size:12px;padding:6px 14px" onclick="showToast('📱 Tasks pushed to HK app')">Push to Mobile App</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Room</th><th>Type</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>104</td><td>Standard</td><td><span class="badge badge-danger">High</span></td><td>Meena Patel</td><td><span class="badge badge-warning">In Progress</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px" onclick="showToast('✅ Room 104 marked Clean')">Mark Clean</button></td></tr>
+                <tr><td>206</td><td>Standard</td><td><span class="badge badge-warning">Normal</span></td><td>Sunita Rao</td><td><span class="badge badge-warning">In Progress</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px" onclick="showToast('✅ Room 206 marked Clean')">Mark Clean</button></td></tr>
+                <tr><td>214</td><td>Deluxe</td><td><span class="badge badge-danger">Urgent</span></td><td>Tech: Ramesh</td><td><span class="badge badge-danger">Maintenance</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 10px" onclick="showToast('🔧 Maintenance ticket updated')">Update</button></td></tr>
+                <tr><td>310</td><td>Deluxe</td><td><span class="badge badge-warning">Normal</span></td><td>Meena Patel</td><td><span class="badge badge-success">Clean</span></td><td><span style="font-size:12px;color:var(--text-muted)">Done 09:31</span></td></tr>
+                <tr><td>402</td><td>Suite</td><td><span class="badge badge-info">Low</span></td><td>Unassigned</td><td><span class="badge badge-gray">Pending</span></td><td><button class="btn btn-gold" style="font-size:11px;padding:4px 10px" onclick="showToast('Assigned to Sunita Rao')">Assign</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Log Maintenance Request</div></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group"><label>Room</label><select><option>214 (Current)</option><option>104</option><option>206</option></select></div>
+              <div class="form-group"><label>Priority</label><select><option>High</option><option>Normal</option><option>Low</option><option>Urgent</option></select></div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px"><label>Issue Category</label><select><option>HVAC / AC</option><option>Plumbing</option><option>Electrical</option><option>Furniture</option><option>TV / AV Equipment</option></select></div>
+            <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea placeholder="AC not cooling — guest complained at 08:55. Compressor making noise. Requires technician.">AC not cooling — guest complained at 08:55. Compressor making noise.</textarea></div>
+            <div class="form-group" style="margin-bottom:14px"><label>Assign To</label><select><option>Ramesh Kumar (Tech)</option><option>Outside Contractor</option><option>Unassigned</option></select></div>
+            <button class="btn btn-gold" style="width:100%;padding:11px" onclick="showToast('🔧 Maintenance request logged & tech notified via SMS')">Submit Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== REPORTS PAGE ===================== -->
+    <div id="page-reports" class="page">
+      <div class="stat-grid">
+        <div class="stat-card gold"><div class="stat-label">Monthly Revenue</div><div class="stat-value">₹58.4L</div><div class="stat-delta">↑ 8.3% vs Feb</div><div class="stat-icon">📈</div></div>
+        <div class="stat-card green"><div class="stat-label">Avg. Occupancy</div><div class="stat-value">74%</div><div class="stat-delta">↑ 2.1% vs Feb</div><div class="stat-icon">🏨</div></div>
+        <div class="stat-card blue"><div class="stat-label">Total Guests</div><div class="stat-value">312</div><div class="stat-delta">↑ 18 vs Feb</div><div class="stat-icon">👥</div></div>
+        <div class="stat-card red"><div class="stat-label">Avg Stay (nights)</div><div class="stat-value">2.8</div><div class="stat-delta">↔ No change</div><div class="stat-icon">🌙</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Monthly Revenue Trend</div></div>
+          <div class="card-body">
+            <div class="chart-bars" style="height:160px">
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:60%;min-height:8px"></div><div class="chart-bar-label">Oct</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%;min-height:8px"></div><div class="chart-bar-label">Nov</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:85%;min-height:8px"></div><div class="chart-bar-label">Dec</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:55%;min-height:8px"></div><div class="chart-bar-label">Jan</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:63%;min-height:8px"></div><div class="chart-bar-label">Feb</div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar" style="height:100%;min-height:8px;background:var(--gold)"></div><div class="chart-bar-label">Mar</div></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:20px;font-size:13px">
+              <div><div style="color:var(--text-muted)">Best month</div><div style="font-weight:600">March 2026</div></div>
+              <div><div style="color:var(--text-muted)">Peak occupancy</div><div style="font-weight:600">Fri–Sat (89%)</div></div>
+              <div><div style="color:var(--text-muted)">Top room type</div><div style="font-weight:600">Suite (90%)</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Guest Source Breakdown</div></div>
+          <div class="card-body">
+            <div class="progress-row"><div class="progress-label" style="min-width:100px">Direct Booking</div><div class="progress-track"><div class="progress-fill" style="width:38%;background:var(--gold)"></div></div><div class="progress-val">38%</div></div>
+            <div class="progress-row"><div class="progress-label" style="min-width:100px">OTA (MakeMyTrip)</div><div class="progress-track"><div class="progress-fill" style="width:28%;background:var(--info)"></div></div><div class="progress-val">28%</div></div>
+            <div class="progress-row"><div class="progress-label" style="min-width:100px">Corporate</div><div class="progress-track"><div class="progress-fill" style="width:20%;background:var(--success)"></div></div><div class="progress-val">20%</div></div>
+            <div class="progress-row"><div class="progress-label" style="min-width:100px">Walk-in</div><div class="progress-track"><div class="progress-fill" style="width:14%;background:var(--text-muted)"></div></div><div class="progress-val">14%</div></div>
+            <div style="margin-top:16px;padding:12px;background:var(--cream);border-radius:8px;font-size:13px;color:var(--text-muted)">
+              💡 Direct bookings up 6% — reduce OTA commission dependency
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GUESTS PAGE ===================== -->
+    <div id="page-guests" class="page">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Guest Directory</div>
+          <input type="text" placeholder="Search guests..." style="width:220px">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Guest</th><th>Contact</th><th>Total Stays</th><th>Lifetime Value</th><th>Segment</th><th>Last Stay</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="background:linear-gradient(135deg,#C9A84C,#9A7A2E);color:var(--navy);font-size:11px">PS</div><div><div style="font-weight:500">Priya Sharma</div><div style="font-size:11px;color:var(--text-muted)">priya@email.com</div></div></div></td>
+                <td style="font-size:13px">+91 98765 43210</td>
+                <td>8</td>
+                <td style="font-weight:600;color:var(--gold)">₹4.2L</td>
+                <td><span class="badge badge-warning">VIP</span></td>
+                <td>22 Mar 2026</td>
+                <td><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">View</button></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="background:linear-gradient(135deg,#3B82F6,#1E40AF);color:white;font-size:11px">JO</div><div><div style="font-weight:500">James O'Brien</div><div style="font-size:11px;color:var(--text-muted)">james@email.com</div></div></div></td>
+                <td style="font-size:13px">+44 7700 900123</td>
+                <td>3</td>
+                <td style="font-weight:600">₹82,000</td>
+                <td><span class="badge badge-info">Regular</span></td>
+                <td>22 Mar 2026</td>
+                <td><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">View</button></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="background:linear-gradient(135deg,#10B981,#065F46);color:white;font-size:11px">AT</div><div><div style="font-weight:500">Aiko Tanaka</div><div style="font-size:11px;color:var(--text-muted)">aiko@email.com</div></div></div></td>
+                <td style="font-size:13px">+81 90 1234 5678</td>
+                <td>1</td>
+                <td style="font-weight:600">₹28,400</td>
+                <td><span class="badge badge-gray">New</span></td>
+                <td>22 Mar 2026</td>
+                <td><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">View</button></td>
+              </tr>
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="background:linear-gradient(135deg,#EF4444,#991B1B);color:white;font-size:11px">SB</div><div><div style="font-weight:500">Sofia Bianchi</div><div style="font-size:11px;color:var(--text-muted)">sofia@email.com</div></div></div></td>
+                <td style="font-size:13px">+39 333 456 7890</td>
+                <td>5</td>
+                <td style="font-weight:600;color:var(--gold)">₹2.8L</td>
+                <td><span class="badge badge-warning">VIP</span></td>
+                <td>19 Feb 2026</td>
+                <td><button class="btn btn-outline" style="font-size:12px;padding:5px 10px">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- NEW BOOKING MODAL -->
+<div class="modal-overlay" id="modal-new-booking">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Reservation</div>
+      <button class="modal-close" onclick="closeModal('new-booking')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" placeholder="First name"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" placeholder="Last name"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" placeholder="guest@example.com"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" placeholder="+91 XXXXX XXXXX"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Check-in Date</label><input type="date"></div>
+        <div class="form-group"><label>Check-out Date</label><input type="date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Room Type</label><select><option>Standard (₹4,500/night)</option><option>Deluxe (₹7,200/night)</option><option>Suite (₹14,000/night)</option></select></div>
+        <div class="form-group"><label>Adults / Children</label><select><option>1 Adult</option><option>2 Adults</option><option>2 Adults, 1 Child</option><option>2 Adults, 2 Children</option></select></div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px"><label>Special Requests</label><textarea placeholder="Anniversary setup, dietary needs, early check-in..."></textarea></div>
+      <div style="padding:12px 14px;background:#FEF3C7;border-radius:8px;font-size:13px;color:#92400E;margin-bottom:4px">
+        💳 Advance payment of 50% required to confirm booking. Booking ID will be auto-generated.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('new-booking')">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmBooking()">Confirm Reservation</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-overlay" id="modal-invoice">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Invoice — INV-2026-0842</div>
+      <button class="modal-close" onclick="closeModal('invoice')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold)">LuxeStay</div>
+          <div style="font-size:12px;color:var(--text-muted)">123 Grand Boulevard, New Delhi 110001</div>
+          <div style="font-size:12px;color:var(--text-muted)">GSTIN: 07AABCU9603R1ZV</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted)">TAX INVOICE</div>
+          <div style="font-size:12px;color:var(--text-muted)">INV-2026-0842</div>
+          <div style="font-size:12px;color:var(--text-muted)">22 Mar 2026</div>
+        </div>
+      </div>
+      <div style="padding:12px 14px;background:var(--cream);border-radius:8px;margin-bottom:16px;font-size:13px">
+        <strong>Billed to:</strong> Priya Sharma · priya@email.com · +91 98765 43210<br>
+        <span style="color:var(--text-muted)">Suite 401 · Check-in: 22 Mar · Check-out: 26 Mar 2026</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Description</th><th style="text-align:right">Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Suite 401 — 4 nights × ₹14,000</td><td style="text-align:right">₹56,000</td></tr>
+            <tr><td>Room Service (Dinner × 3)</td><td style="text-align:right">₹1,840</td></tr>
+            <tr><td>Laundry Services</td><td style="text-align:right">₹620</td></tr>
+            <tr><td>Spa Treatment (1 session)</td><td style="text-align:right">₹3,200</td></tr>
+            <tr><td>Tourism Levy (₹200 × 4 nights)</td><td style="text-align:right">₹800</td></tr>
+            <tr class="invoice-total"><td>GST @18% (on ₹61,660)</td><td style="text-align:right">₹11,099</td></tr>
+            <tr class="invoice-total"><td style="font-size:16px;color:var(--gold)">Total Due</td><td style="text-align:right;font-size:16px;color:var(--gold);font-weight:700">₹73,559</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--text-muted);text-align:center">Thank you for choosing LuxeStay. Payment due within 24 hours of check-out.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('invoice')">Close</button>
+      <button class="btn btn-outline" onclick="showToast('🖨️ Sent to printer')">Print</button>
+      <button class="btn btn-gold" onclick="showToast('📧 Invoice emailed to priya@email.com');closeModal('invoice')">Email Invoice</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const pageTitles = {
+  dashboard: 'Dashboard Overview',
+  rooms: 'Room Management',
+  bookings: 'Reservations',
+  checkin: 'Check-in / Check-out',
+  billing: 'Billing & Invoicing',
+  housekeeping: 'Housekeeping',
+  reports: 'Analytics & Reports',
+  guests: 'Guest Directory'
+};
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id] || id;
+}
+
+function switchTab(el, targetId) {
+  const tabBar = el.parentElement;
+  tabBar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const parent = tabBar.nextElementSibling;
+  const allPanels = ['room-map','room-list','pricing'];
+  allPanels.forEach(id => {
+    const el2 = document.getElementById(id);
+    if (el2) el2.style.display = id === targetId ? 'block' : 'none';
+  });
+}
+
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById('modal-' + id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function confirmBooking() {
+  const id = 'BK-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-00' + Math.floor(Math.random()*9+6);
+  closeModal('new-booking');
+  showToast('✅ Booking confirmed — ' + id + '. Confirmation email sent.');
+}
+
+function showRoomDetail(num) {
+  const statuses = {101:'Available',102:'Occupied by James O\'Brien',103:'Available',104:'Cleaning in progress',105:'Occupied',106:'Available',201:'Occupied',214:'Under maintenance — AC repair',203:'Available',204:'Occupied',205:'Available',206:'Cleaning in progress',301:'Occupied',302:'Occupied by Aiko Tanaka',310:'Clean & Ready',401:'Occupied by Priya Sharma',402:'Available — Suite',501:'Occupied by Sofia Bianchi'};
+  showToast('Room ' + num + ': ' + (statuses[num] || 'Status unknown'));
+}
+</script>
+</body>
+</html>
