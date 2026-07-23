@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LuxeStay HMS — Hotel Management System</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --gold: #C9A84C;
@@ -509,10 +510,14 @@ textarea { resize: vertical; min-height: 80px; }
 
     <div class="sidebar-footer">
       <div class="user-pill">
-        <div class="user-avatar">AD</div>
-        <div>
-          <div class="user-name">Alex Dubois</div>
-          <div class="user-role">Administrator</div>
+        <div class="user-avatar" id="user-avatar-text">AD</div>
+        <div style="flex:1;overflow:hidden">
+          <div class="user-name" id="user-name-text">Alex Dubois</div>
+          <select id="role-selector" onchange="changeUserRole(this.value)" style="background:transparent;border:none;color:var(--gold);font-size:11px;padding:0;font-family:'DM Sans',sans-serif;cursor:pointer;outline:none;width:100%">
+            <option value="admin" style="color:var(--navy);background:white">👑 Administrator</option>
+            <option value="frontdesk" style="color:var(--navy);background:white">🔑 Front Desk</option>
+            <option value="housekeeper" style="color:var(--navy);background:white">🧹 Housekeeper</option>
+          </select>
         </div>
       </div>
       <div style="font-size: 10px; color: var(--gold-light); opacity: 0.7; margin-top: 10px; text-align: center; font-family: 'DM Sans', sans-serif;">
@@ -682,8 +687,12 @@ textarea { resize: vertical; min-height: 80px; }
 
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Weekly Revenue</div>
-            <span style="font-size:12px;color:var(--text-muted)">Mar 16–22, 2026</span>
+            <div class="card-title">Revenue Analytics</div>
+            <div style="display:flex;gap:4px">
+              <button class="tab active" style="padding:3px 8px;font-size:11px" onclick="switchChartTimeframe('week', this)">Week</button>
+              <button class="tab" style="padding:3px 8px;font-size:11px" onclick="switchChartTimeframe('month', this)">Month</button>
+              <button class="tab" style="padding:3px 8px;font-size:11px" onclick="switchChartTimeframe('year', this)">Year</button>
+            </div>
           </div>
           <div class="card-body">
             <div class="chart-bars">
@@ -1263,7 +1272,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('invoice')">Close</button>
-      <button class="btn btn-outline" onclick="showToast('🖨️ Sent to printer')">Print</button>
+      <button class="btn btn-outline" onclick="downloadInvoicePDF()">📥 Download PDF</button>
       <button class="btn btn-gold" onclick="showToast('📧 Invoice emailed to priya@email.com');closeModal('invoice')">Email Invoice</button>
     </div>
   </div>
@@ -1457,6 +1466,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (values[idx]) bar.parentElement.setAttribute('data-val', values[idx]);
   });
 });
+
+// PDF Invoice Export
+function downloadInvoicePDF() {
+  showToast('📄 Generating PDF Invoice...');
+  const element = document.querySelector('#modal-invoice .modal-body');
+  const opt = {
+    margin:       0.4,
+    filename:     'LuxeStay-Invoice-INV-2026-0842.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save().then(() => {
+    showToast('✅ PDF Invoice downloaded successfully!');
+  });
+}
+
+// User RBAC Role Switcher
+function changeUserRole(role) {
+  const roles = {
+    admin: { name: 'Alex Dubois', avatar: 'AD', roleName: 'Administrator' },
+    frontdesk: { name: 'Rahul Verma', avatar: 'RV', roleName: 'Front Desk Lead' },
+    housekeeper: { name: 'Meena Patel', avatar: 'MP', roleName: 'HK Supervisor' }
+  };
+  const info = roles[role] || roles.admin;
+  document.getElementById('user-avatar-text').textContent = info.avatar;
+  document.getElementById('user-name-text').textContent = info.name;
+  showToast('👤 Switched active role to: ' + info.roleName);
+}
+
+// Revenue Analytics Chart Timeframe Switcher
+function switchChartTimeframe(tf, btnEl) {
+  if (btnEl) {
+    btnEl.parentElement.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  const datasets = {
+    week: { heights: ['55%','70%','48%','82%','90%','100%','76%'], labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], vals: ['₹14.2k','₹18.5k','₹12.1k','₹21.4k','₹24.8k','₹28.0k','₹19.6k'] },
+    month: { heights: ['60%','75%','85%','95%','70%','90%','80%'], labels: ['W1','W2','W3','W4','W5','W6','W7'], vals: ['₹1.2L','₹1.5L','₹1.8L','₹2.1L','₹1.4L','₹1.9L','₹1.6L'] },
+    year: { heights: ['40%','50%','65%','80%','90%','100%','85%'], labels: ['Q1','Q2','Q3','Q4','Q5','Q6','Q7'], vals: ['₹12.4L','₹15.8L','₹18.2L','₹22.1L','₹25.4L','₹28.9L','₹24.1L'] }
+  };
+  const data = datasets[tf] || datasets.week;
+  const bars = document.querySelectorAll('#page-dashboard .chart-bar-wrap');
+  bars.forEach((wrap, i) => {
+    const bar = wrap.querySelector('.chart-bar');
+    const lbl = wrap.querySelector('.chart-bar-label');
+    if (data.heights[i]) bar.style.height = data.heights[i];
+    if (data.labels[i]) lbl.textContent = data.labels[i];
+    if (data.vals[i]) wrap.setAttribute('data-val', data.vals[i]);
+  });
+  showToast('📊 Revenue timeframe updated: ' + tf.toUpperCase());
+}
 </script>
 </body>
 </html>
