@@ -194,6 +194,83 @@ textarea { resize: vertical; min-height: 80px; }
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
+/* GLASSMORPHISM & CARD ELEVATION */
+.topbar {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.card {
+  box-shadow: var(--shadow);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* ROOM FILTER PILLS */
+.room-filter-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.filter-pill:hover {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+}
+.filter-pill.active {
+  background: var(--navy);
+  color: var(--gold);
+  border-color: var(--navy);
+  box-shadow: 0 2px 8px rgba(15, 27, 45, 0.18);
+}
+
+/* CHART BAR TOOLTIPS */
+.chart-bar-wrap {
+  position: relative;
+}
+.chart-bar-wrap:hover::after {
+  content: attr(data-val);
+  position: absolute;
+  top: -28px;
+  background: var(--navy);
+  color: var(--gold);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  pointer-events: none;
+  z-index: 10;
+}
+.chart-bar {
+  transition: height 0.4s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+.chart-bar:hover {
+  transform: scaleY(1.04);
+}
+
+/* MODAL ENTRANCE ANIMATION */
+.modal-overlay.open .modal {
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* DASHBOARD PREMIUM WIDGETS */
 .dash-welcome-card {
   background: linear-gradient(135deg, #0F1B2D 0%, #1A2E47 100%);
@@ -658,6 +735,13 @@ textarea { resize: vertical; min-height: 80px; }
             </div>
           </div>
           <div class="card-body">
+            <div class="room-filter-pills">
+              <button class="filter-pill active" onclick="filterRoomMap('all', this)">All Rooms</button>
+              <button class="filter-pill" onclick="filterRoomMap('available', this)">🟢 Available</button>
+              <button class="filter-pill" onclick="filterRoomMap('occupied', this)">🔵 Occupied</button>
+              <button class="filter-pill" onclick="filterRoomMap('cleaning', this)">🟡 Cleaning</button>
+              <button class="filter-pill" onclick="filterRoomMap('maintenance', this)">🔴 Maintenance</button>
+            </div>
             <div style="margin-bottom:12px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">Floor 1</div>
             <div class="room-grid" style="margin-bottom:20px">
               <div class="room-cell available" onclick="showRoomDetail(101)"><div class="room-num">101</div><div class="room-type-label">Standard</div></div>
@@ -1185,6 +1269,42 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
+<!-- ROOM DETAIL MODAL -->
+<div class="modal-overlay" id="modal-room-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="rd-modal-title">Room Details</div>
+      <button class="modal-close" onclick="closeModal('room-detail')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="padding:14px;background:var(--cream);border-radius:10px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:20px;font-family:'DM Serif Display',serif;color:var(--text)" id="rd-room-name">Room 101</div>
+          <div style="font-size:12px;color:var(--text-muted)" id="rd-room-type">Standard Room</div>
+        </div>
+        <span class="badge badge-success" id="rd-status-badge">Available</span>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Update Status</label>
+        <select id="rd-status-select" style="font-size:14px">
+          <option value="available">🟢 Available &amp; Ready</option>
+          <option value="occupied">🔵 Occupied</option>
+          <option value="cleaning">🟡 Cleaning in Progress</option>
+          <option value="maintenance">🔴 Maintenance Required</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Assigned Guest / Notes</label>
+        <input type="text" id="rd-guest-notes" placeholder="Guest name or maintenance notes...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('room-detail')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveRoomStatus()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1257,10 +1377,86 @@ function confirmBooking() {
   showToast('✅ Booking confirmed — ' + id + '. Confirmation email sent.');
 }
 
-function showRoomDetail(num) {
-  const statuses = {101:'Available',102:'Occupied by James O\'Brien',103:'Available',104:'Cleaning in progress',105:'Occupied',106:'Available',201:'Occupied',214:'Under maintenance — AC repair',203:'Available',204:'Occupied',205:'Available',206:'Cleaning in progress',301:'Occupied',302:'Occupied by Aiko Tanaka',310:'Clean & Ready',401:'Occupied by Priya Sharma',402:'Available — Suite',501:'Occupied by Sofia Bianchi'};
-  showToast('Room ' + num + ': ' + (statuses[num] || 'Status unknown'));
+let currentSelectedRoom = null;
+
+function filterRoomMap(status, btnEl) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  document.querySelectorAll('.room-cell').forEach(cell => {
+    if (status === 'all' || cell.classList.contains(status)) {
+      cell.style.display = 'flex';
+    } else {
+      cell.style.display = 'none';
+    }
+  });
 }
+
+function showRoomDetail(num) {
+  currentSelectedRoom = num;
+  const roomEl = Array.from(document.querySelectorAll('.room-cell')).find(c => c.querySelector('.room-num').textContent == num);
+  if (!roomEl) return;
+  
+  const roomType = roomEl.querySelector('.room-type-label').textContent;
+  let status = 'available';
+  if (roomEl.classList.contains('occupied')) status = 'occupied';
+  else if (roomEl.classList.contains('cleaning')) status = 'cleaning';
+  else if (roomEl.classList.contains('maintenance')) status = 'maintenance';
+
+  document.getElementById('rd-room-name').textContent = 'Room ' + num;
+  document.getElementById('rd-room-type').textContent = roomType + ' Room';
+  document.getElementById('rd-status-select').value = status;
+  
+  const statusBadge = document.getElementById('rd-status-badge');
+  statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  statusBadge.className = 'badge badge-' + (status === 'available' ? 'success' : status === 'occupied' ? 'info' : status === 'cleaning' ? 'warning' : 'danger');
+
+  openModal('room-detail');
+}
+
+function saveRoomStatus() {
+  if (!currentSelectedRoom) return;
+  const newStatus = document.getElementById('rd-status-select').value;
+  const roomEl = Array.from(document.querySelectorAll('.room-cell')).find(c => c.querySelector('.room-num').textContent == currentSelectedRoom);
+  
+  if (roomEl) {
+    roomEl.className = 'room-cell ' + newStatus;
+    localStorage.setItem('room_status_' + currentSelectedRoom, newStatus);
+  }
+  
+  closeModal('room-detail');
+  showToast('✅ Room ' + currentSelectedRoom + ' status updated to ' + newStatus.toUpperCase());
+}
+
+// Attach Live Search Listeners & Local Storage Persistence
+document.addEventListener('DOMContentLoaded', () => {
+  // Load saved room statuses
+  document.querySelectorAll('.room-cell').forEach(cell => {
+    const num = cell.querySelector('.room-num').textContent;
+    const saved = localStorage.getItem('room_status_' + num);
+    if (saved) cell.className = 'room-cell ' + saved;
+  });
+
+  // Table real-time search filtering
+  document.querySelectorAll('input[placeholder*="Search"]').forEach(input => {
+    input.addEventListener('input', e => {
+      const q = e.target.value.toLowerCase().trim();
+      const card = input.closest('.card');
+      if (!card) return;
+      const rows = card.querySelectorAll('tbody tr');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(q) ? '' : 'none';
+      });
+    });
+  });
+
+  // Add chart tooltips
+  const chartBars = document.querySelectorAll('.chart-bar');
+  const values = ['₹14.2k','₹18.5k','₹12.1k','₹21.4k','₹24.8k','₹28.0k','₹19.6k'];
+  chartBars.forEach((bar, idx) => {
+    if (values[idx]) bar.parentElement.setAttribute('data-val', values[idx]);
+  });
+});
 </script>
 </body>
 </html>
