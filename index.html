@@ -193,11 +193,188 @@ textarea { resize: vertical; min-height: 80px; }
 /* TOAST */
 .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 999; transform: translateY(80px); opacity: 0; transition: all 0.3s; }
 .toast.show { transform: translateY(0); opacity: 1; }
+
+/* DASHBOARD PREMIUM WIDGETS */
+.dash-welcome-card {
+  background: linear-gradient(135deg, #0F1B2D 0%, #1A2E47 100%);
+  border-radius: 16px;
+  padding: 20px 24px;
+  color: white;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(201,168,76,0.25);
+  box-shadow: var(--shadow);
+}
+.dash-welcome-greeting {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.dash-welcome-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+.dash-quick-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.stat-icon-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--cream-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.dash-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.dash-metric-item {
+  background: var(--cream);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(201,168,76,0.1);
+}
+
+/* MOBILE RESPONSIVE STYLES */
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--navy);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s;
+}
+.mobile-menu-btn:hover { background: var(--cream-dark); }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 27, 45, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 190;
+  transition: opacity 0.25s ease;
+}
+.sidebar-overlay.active { display: block; }
+
+@media (max-width: 1024px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .room-grid { grid-template-columns: repeat(4, 1fr); }
+  .three-col { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .hms-shell { position: relative; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 200;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 6px 0 30px rgba(15, 27, 45, 0.25);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .mobile-menu-btn { display: flex; }
+  
+  .topbar { padding: 0 16px; height: 56px; }
+  .topbar-title { font-size: 16px; }
+  .topbar-date { display: none; }
+  .btn { padding: 7px 12px; font-size: 12px; }
+
+  .dash-welcome-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+  }
+  .dash-quick-actions {
+    width: 100%;
+  }
+  .dash-quick-actions .btn {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .page { padding: 16px 12px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; margin-bottom: 16px; }
+  .stat-card { padding: 14px 12px; }
+  .stat-value { font-size: 24px; }
+  .stat-delta { font-size: 11px; }
+
+  .dash-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .dash-metric-item {
+    padding: 8px 6px;
+    text-align: center;
+  }
+  
+  .two-col, .three-col { grid-template-columns: 1fr !important; gap: 14px; }
+  .form-row { grid-template-columns: 1fr !important; gap: 10px; }
+  
+  .room-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; }
+  .room-cell { font-size: 11px; }
+  .room-num { font-size: 13px; }
+  .room-type-label { font-size: 8px; }
+
+  .card-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+  .card-header input { width: 100% !important; }
+  .card-body { padding: 14px; }
+
+  .modal { width: calc(100vw - 24px); max-width: 100%; margin: 12px; max-height: 88vh; }
+  .modal-header, .modal-body, .modal-footer { padding: 16px; }
+
+  .hk-legend { gap: 10px; }
+  .tab-bar { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 6px 14px; font-size: 12px; }
+
+  input, select, textarea { font-size: 16px !important; }
+  .toast { left: 16px; right: 16px; bottom: 16px; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr !important; }
+  .dash-metrics-grid { grid-template-columns: 1fr; }
+  .room-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .chart-bars { height: 120px; }
+}
 </style>
 </head>
 <body>
 
 <div class="hms-shell">
+  <!-- SIDEBAR OVERLAY FOR MOBILE -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-brand">
@@ -273,41 +450,65 @@ textarea { resize: vertical; min-height: 80px; }
     <!-- TOPBAR -->
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:10px">
+        <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <span class="live-dot"></span>
         <span class="topbar-title" id="page-title">Dashboard</span>
       </div>
       <div class="topbar-actions">
-        <span style="font-size:13px;color:var(--text-muted)">Sun, 22 Mar 2026</span>
+        <span class="topbar-date" style="font-size:13px;color:var(--text-muted)">Sun, 22 Mar 2026</span>
         <button class="btn btn-gold" onclick="openModal('new-booking')">+ New Booking</button>
       </div>
     </div>
 
     <!-- ===================== DASHBOARD PAGE ===================== -->
     <div id="page-dashboard" class="page active">
+      <!-- WELCOME HERO BANNER -->
+      <div class="dash-welcome-card">
+        <div>
+          <div class="dash-welcome-greeting">Good Afternoon, Alex 👋</div>
+          <div class="dash-welcome-sub">LuxeStay Hotel Overview &amp; Live Operations</div>
+        </div>
+        <div class="dash-quick-actions">
+          <button class="btn btn-gold" onclick="openModal('new-booking')">+ New Booking</button>
+          <button class="btn btn-outline" style="background:rgba(255,255,255,0.1);color:white;border-color:rgba(201,168,76,0.3)" onclick="showPage('checkin', document.querySelectorAll('.nav-item')[3])">🔑 Check-in</button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
       <div class="stat-grid">
         <div class="stat-card gold">
-          <div class="stat-label">Occupancy Rate</div>
+          <div class="stat-header">
+            <div class="stat-label">Occupancy Rate</div>
+            <div class="stat-icon-badge">🏨</div>
+          </div>
           <div class="stat-value">78%</div>
           <div class="stat-delta">↑ 4.2% vs yesterday</div>
-          <div class="stat-icon">🏨</div>
         </div>
         <div class="stat-card green">
-          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-header">
+            <div class="stat-label">Today's Revenue</div>
+            <div class="stat-icon-badge">💰</div>
+          </div>
           <div class="stat-value">₹2.4L</div>
           <div class="stat-delta">↑ 12% vs last week</div>
-          <div class="stat-icon">💰</div>
         </div>
         <div class="stat-card blue">
-          <div class="stat-label">Active Guests</div>
+          <div class="stat-header">
+            <div class="stat-label">Active Guests</div>
+            <div class="stat-icon-badge">👥</div>
+          </div>
           <div class="stat-value">47</div>
           <div class="stat-delta">↑ 3 check-ins today</div>
-          <div class="stat-icon">👥</div>
         </div>
         <div class="stat-card red">
-          <div class="stat-label">Pending Requests</div>
+          <div class="stat-header">
+            <div class="stat-label">Pending Requests</div>
+            <div class="stat-icon-badge">⚠️</div>
+          </div>
           <div class="stat-value">6</div>
           <div class="stat-delta down">↑ 2 maintenance alerts</div>
-          <div class="stat-icon">⚠️</div>
         </div>
       </div>
 
@@ -319,16 +520,18 @@ textarea { resize: vertical; min-height: 80px; }
             <span class="badge badge-info">8 expected</span>
           </div>
           <div class="card-body" style="padding:0">
-            <table>
-              <thead><tr><th>Guest</th><th>Room</th><th>Type</th><th>Status</th></tr></thead>
-              <tbody>
-                <tr><td><div style="font-weight:500">Priya Sharma</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-001</div></td><td>401</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-success">Checked In</span></td></tr>
-                <tr><td><div style="font-weight:500">James O'Brien</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-002</div></td><td>215</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
-                <tr><td><div style="font-weight:500">Aiko Tanaka</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-003</div></td><td>118</td><td><span class="badge badge-gray">Standard</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
-                <tr><td><div style="font-weight:500">Ravi Menon</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-004</div></td><td>302</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
-                <tr><td><div style="font-weight:500">Sofia Bianchi</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-005</div></td><td>501</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
-              </tbody>
-            </table>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Guest</th><th>Room</th><th>Type</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><div style="font-weight:500">Priya Sharma</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-001</div></td><td>401</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-success">Checked In</span></td></tr>
+                  <tr><td><div style="font-weight:500">James O'Brien</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-002</div></td><td>215</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
+                  <tr><td><div style="font-weight:500">Aiko Tanaka</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-003</div></td><td>118</td><td><span class="badge badge-gray">Standard</span></td><td><span class="badge badge-warning">Arriving</span></td></tr>
+                  <tr><td><div style="font-weight:500">Ravi Menon</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-004</div></td><td>302</td><td><span class="badge badge-gray">Deluxe</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
+                  <tr><td><div style="font-weight:500">Sofia Bianchi</div><div style="font-size:11px;color:var(--text-muted)">BK-20260322-005</div></td><td>501</td><td><span class="badge badge-gray">Suite</span></td><td><span class="badge badge-gray">Pending</span></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -415,10 +618,10 @@ textarea { resize: vertical; min-height: 80px; }
               <div class="chart-bar-wrap"><div class="chart-bar" style="height:100%;background:var(--gold)"></div><div class="chart-bar-label">Sat</div></div>
               <div class="chart-bar-wrap"><div class="chart-bar" style="height:76%"></div><div class="chart-bar-label">Sun</div></div>
             </div>
-            <div style="margin-top:16px;display:flex;gap:20px">
-              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">This Week</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹14.7L</div></div>
-              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">RevPAR</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹4,820</div></div>
-              <div><div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">ADR</div><div style="font-size:18px;font-weight:600;margin-top:2px">₹6,180</div></div>
+            <div class="dash-metrics-grid">
+              <div class="dash-metric-item"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">This Week</div><div style="font-size:16px;font-weight:600;margin-top:2px">₹14.7L</div></div>
+              <div class="dash-metric-item"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">RevPAR</div><div style="font-size:16px;font-weight:600;margin-top:2px">₹4,820</div></div>
+              <div class="dash-metric-item"><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px">ADR</div><div style="font-size:16px;font-weight:600;margin-top:2px">₹6,180</div></div>
             </div>
           </div>
         </div>
@@ -762,7 +965,7 @@ textarea { resize: vertical; min-height: 80px; }
 
     <!-- ===================== HOUSEKEEPING PAGE ===================== -->
     <div id="page-housekeeping" class="page">
-      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-grid">
         <div class="stat-card green"><div class="stat-label">Clean</div><div class="stat-value">28</div><div class="stat-icon">✅</div></div>
         <div class="stat-card gold"><div class="stat-label">In Progress</div><div class="stat-value">5</div><div class="stat-icon">🧹</div></div>
         <div class="stat-card red"><div class="stat-label">Maintenance</div><div class="stat-value">2</div><div class="stat-icon">🔧</div></div>
@@ -996,12 +1199,27 @@ const pageTitles = {
   guests: 'Guest Directory'
 };
 
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+}
+
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  el.classList.add('active');
+  if (el) el.classList.add('active');
   document.getElementById('page-title').textContent = pageTitles[id] || id;
+  closeMobileSidebar();
 }
 
 function switchTab(el, targetId) {
